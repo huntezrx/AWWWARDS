@@ -10,6 +10,7 @@ import {
   AnimatePresence,
 } from "framer-motion";
 import MagneticButton from "../ui/MagneticButton";
+import LightRays from "../ui/LightRays";
 
 // ─── Letter-by-letter reveal ───────────────────────────────────────────────
 function SplitText({
@@ -237,6 +238,9 @@ export default function Hero() {
       ref={containerRef}
       className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden"
     >
+      {/* Volumetric light rays */}
+      <LightRays />
+
       {/* Depth layers */}
       <DepthLayer depth={0.4} mouseX={mouseX} mouseY={mouseY}>
         <OrbitalRings mouseX={mouseX} mouseY={mouseY} />

@@ -4,12 +4,17 @@ import dynamic from "next/dynamic";
 import { useRef } from "react";
 import * as THREE from "three";
 import { useLenis } from "@/hooks/useLenis";
+import { useScrollVelocity } from "@/hooks/useScrollVelocity";
 
 // ── Static sections ──────────────────────────────────────────────────────
-import CustomCursor   from "@/components/ui/CustomCursor";
-import LoadingScreen  from "@/components/ui/LoadingScreen";
-import Navigation     from "@/components/Navigation";
-import Hero           from "@/components/sections/Hero";
+import CustomCursor     from "@/components/ui/CustomCursor";
+import LoadingScreen    from "@/components/ui/LoadingScreen";
+import CinematicOverlay from "@/components/ui/CinematicOverlay";
+import AmbientSound     from "@/components/ui/AmbientSound";
+import EasterEggs       from "@/components/ui/EasterEggs";
+import PageProgress     from "@/components/ui/PageProgress";
+import Navigation       from "@/components/Navigation";
+import Hero             from "@/components/sections/Hero";
 import Stats          from "@/components/sections/Stats";
 import MarqueeSection from "@/components/sections/MarqueeSection";
 import About          from "@/components/sections/About";
@@ -33,11 +38,16 @@ const ScrollStory     = dynamic(() => import("@/components/sections/ScrollStory"
 export default function Home() {
   useLenis();
   const mouseRef = useRef(new THREE.Vector2(0, 0));
+  useScrollVelocity();
 
   return (
     <>
       <LoadingScreen />
       <CustomCursor />
+      <CinematicOverlay />
+      <AmbientSound />
+      <EasterEggs />
+      <PageProgress />
 
       {/* Persistent WebGL aurora backdrop */}
       <WebGLBackground />
