@@ -1,167 +1,217 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import TextReveal from "../ui/TextReveal";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import SectionLabel from "../ui/SectionLabel";
 
-const testimonials = [
+const TESTIMONIALS = [
   {
     id: 1,
-    quote:
-      "Working with Lumina transformed our product entirely. The attention to detail and visual sophistication they brought to our platform set us apart from every competitor in the market.",
+    quote: "Lumina didn't just redesign our product — they rewrote the ceiling of what we thought was possible. Our conversion rate went from 2.1% to 8.9% in 30 days.",
     author: "Sarah Chen",
-    role: "CPO at Nexus",
+    role: "CPO",
+    company: "Nexus AI",
+    metric: { v: "8.9%", l: "Conversion Rate" },
     avatar: "SC",
     accent: "#6366f1",
   },
   {
     id: 2,
-    quote:
-      "The experience they created is unlike anything I've seen. Users consistently tell us our platform feels like the future. Our conversion rate increased 340% post-launch.",
+    quote: "I've worked with agencies in SF, NYC, and London. None of them shipped anything close to what Lumina delivered in 4 weeks. The WebGL environment alone is worth the price.",
     author: "Marcus Reeves",
-    role: "CEO at Aurora Finance",
+    role: "CEO",
+    company: "Aurora Finance",
+    metric: { v: "$4.2M", l: "Revenue Month 1" },
     avatar: "MR",
     accent: "#06b6d4",
   },
   {
     id: 3,
-    quote:
-      "Not just designers — they're digital artists. Every scroll, every hover, every transition has been meticulously crafted. It's the most impressive work I've seen in 15 years.",
+    quote: "They asked better questions than our own team. The discovery session alone clarified 6 months of internal confusion. Then they built it in 3 weeks.",
     author: "Elena Vasquez",
-    role: "Design Director at Phantom",
+    role: "Design Director",
+    company: "Phantom Labs",
+    metric: { v: "SOTD", l: "Awwwards Winner" },
     avatar: "EV",
     accent: "#8b5cf6",
   },
+  {
+    id: 4,
+    quote: "We gave them a napkin sketch and a brand deck. We got a site that made our Series B investors ask if we were already a unicorn.",
+    author: "James Park",
+    role: "Founder",
+    company: "Stellar Commerce",
+    metric: { v: "210%", l: "Investor Interest" },
+    avatar: "JP",
+    accent: "#ec4899",
+  },
 ];
+
+function TestimonialCard({ t, isActive }: { t: typeof TESTIMONIALS[0]; isActive: boolean }) {
+  return (
+    <motion.div
+      className="relative rounded-[28px] p-7 md:p-9 h-full"
+      style={{
+        background: isActive
+          ? `linear-gradient(135deg, ${t.accent}12, rgba(255,255,255,0.02))`
+          : "var(--surface)",
+        border: `1px solid ${isActive ? t.accent + "30" : "var(--border)"}`,
+        boxShadow: isActive ? `0 20px 60px ${t.accent}15` : "none",
+      }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Top bar accent */}
+      <motion.div
+        className="absolute top-0 left-8 right-8 h-px rounded-full"
+        style={{ background: t.accent }}
+        animate={{ opacity: isActive ? 0.6 : 0.15 }}
+        transition={{ duration: 0.4 }}
+      />
+
+      {/* Quote mark */}
+      <div className="text-5xl font-serif leading-none mb-4 select-none" style={{ color: `${t.accent}25` }}>&ldquo;</div>
+
+      {/* Quote */}
+      <blockquote className="body-lg text-white/65 leading-relaxed mb-8">
+        {t.quote}
+      </blockquote>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Author */}
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center label text-[10px]"
+            style={{ background: `${t.accent}20`, border: `1px solid ${t.accent}35`, color: t.accent }}
+          >
+            {t.avatar}
+          </div>
+          <div>
+            <div className="body-sm text-white/80 font-medium">{t.author}</div>
+            <div className="label text-[9px] text-white/30">{t.role} · {t.company}</div>
+          </div>
+        </div>
+
+        {/* Metric */}
+        <div className="text-right shrink-0">
+          <div className="text-xl font-light" style={{ color: t.accent }}>{t.metric.v}</div>
+          <div className="label text-[9px] text-white/25">{t.metric.l}</div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function Testimonials() {
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(1);
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["-3%", "3%"]);
 
-  const paginate = (newDirection: number) => {
-    setDirection(newDirection);
-    setActive((prev) => (prev + newDirection + testimonials.length) % testimonials.length);
+  const paginate = (dir: number) => {
+    setDirection(dir);
+    setActive((a) => (a + dir + TESTIMONIALS.length) % TESTIMONIALS.length);
   };
 
   return (
-    <section
-      className="relative py-32 md:py-48 overflow-hidden"
-      style={{ background: "#020206" }}
-    >
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          className="absolute left-1/2 top-1/2 w-[800px] h-[400px] rounded-full opacity-15"
-          style={{
-            background: "radial-gradient(ellipse, rgba(99,102,241,0.4) 0%, transparent 70%)",
-            filter: "blur(80px)",
-            translateX: "-50%",
-            translateY: "-50%",
-          }}
-          animate={{ scale: [1, 1.1, 1], opacity: [0.15, 0.25, 0.15] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+    <section ref={ref} className="section relative overflow-hidden" style={{ background: "var(--bg)" }}>
+      {/* Bg */}
+      <motion.div className="absolute inset-0 pointer-events-none" style={{ y }}>
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] opacity-[0.06]"
+          style={{ background: "radial-gradient(ellipse, #6366f1, transparent 70%)", filter: "blur(80px)" }}
         />
-      </div>
+      </motion.div>
 
-      <div className="max-w-5xl mx-auto px-6 md:px-10">
+      <div className="container relative">
         {/* Header */}
-        <div className="text-center mb-16">
-          <motion.div
-            className="flex items-center justify-center gap-3 mb-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <div className="w-8 h-px bg-indigo-500" />
-            <span className="text-xs text-indigo-400/80 tracking-[0.4em] uppercase font-light">
-              Testimonials
-            </span>
-            <div className="w-8 h-px bg-indigo-500" />
-          </motion.div>
-          <TextReveal
-            text="What our clients say"
-            className="text-4xl md:text-5xl font-thin text-white/90 justify-center"
-          />
-        </div>
-
-        {/* Testimonial card */}
-        <div className="relative">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={active}
-              custom={direction}
-              initial={{ opacity: 0, x: direction * 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: direction * -60 }}
-              transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-              className="glass-strong rounded-3xl p-10 md:p-16 text-center relative overflow-hidden"
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <SectionLabel>Client results</SectionLabel>
+            <motion.h2
+              className="display-md text-white/90"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             >
-              {/* Accent glow */}
-              <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-1 rounded-full opacity-60"
-                style={{ background: testimonials[active].accent }}
-              />
+              Words from the{" "}
+              <span className="gradient-text">people we moved.</span>
+            </motion.h2>
+          </div>
 
-              {/* Quote mark */}
-              <div className="text-8xl text-white/5 font-serif leading-none mb-6 -mt-4">&ldquo;</div>
-
-              <blockquote className="text-xl md:text-2xl text-white/70 font-light leading-relaxed mb-10 max-w-3xl mx-auto">
-                {testimonials[active].quote}
-              </blockquote>
-
-              {/* Author */}
-              <div className="flex items-center justify-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium text-white"
-                  style={{ background: `${testimonials[active].accent}40`, border: `1px solid ${testimonials[active].accent}50` }}
-                >
-                  {testimonials[active].avatar}
-                </div>
-                <div className="text-left">
-                  <div className="text-white/80 text-sm font-medium">{testimonials[active].author}</div>
-                  <div className="text-white/30 text-xs tracking-wider">{testimonials[active].role}</div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-center gap-6 mt-8">
+          {/* Nav arrows */}
+          <div className="flex items-center gap-2 shrink-0">
             <motion.button
-              className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all duration-300 cursor-none"
               onClick={() => paginate(-1)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              ←
-            </motion.button>
+              className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/40 hover:text-white/80 cursor-none transition-colors"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.93 }}
+            >←</motion.button>
 
-            <div className="flex gap-2">
-              {testimonials.map((_, i) => (
-                <motion.button
+            <div className="flex gap-1.5 px-2">
+              {TESTIMONIALS.map((_, i) => (
+                <button
                   key={i}
-                  className="h-px cursor-none transition-all duration-500"
+                  onClick={() => { setDirection(i > active ? 1 : -1); setActive(i); }}
+                  className="h-px cursor-none transition-all duration-400"
                   style={{
-                    background: i === active ? testimonials[active].accent : "rgba(255,255,255,0.1)",
-                    width: i === active ? 32 : 16,
+                    width: i === active ? 28 : 12,
+                    background: i === active ? TESTIMONIALS[active].accent : "rgba(255,255,255,0.15)",
                   }}
-                  onClick={() => {
-                    setDirection(i > active ? 1 : -1);
-                    setActive(i);
-                  }}
+                  aria-label={`Testimonial ${i + 1}`}
                 />
               ))}
             </div>
 
             <motion.button
-              className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all duration-300 cursor-none"
               onClick={() => paginate(1)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              →
-            </motion.button>
+              className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/40 hover:text-white/80 cursor-none transition-colors"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.93 }}
+            >→</motion.button>
           </div>
+        </div>
+
+        {/* Cards — show 1 active + previews */}
+        <div className="relative overflow-hidden">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={active}
+              custom={direction}
+              initial={{ opacity: 0, x: direction * 80, scale: 0.97 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: direction * -80, scale: 0.97 }}
+              transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <TestimonialCard t={TESTIMONIALS[active]} isActive={true} />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Preview cards row */}
+        <div className="grid grid-cols-3 gap-3 mt-3">
+          {TESTIMONIALS.filter((_, i) => i !== active).slice(0, 3).map((t) => (
+            <motion.button
+              key={t.id}
+              onClick={() => { setDirection(TESTIMONIALS.indexOf(t) > active ? 1 : -1); setActive(TESTIMONIALS.indexOf(t)); }}
+              className="relative rounded-2xl p-4 text-left cursor-none transition-all duration-300 overflow-hidden"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+              whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.12)" }}
+            >
+              <p className="body-sm text-white/28 line-clamp-2 mb-3">{t.quote}</p>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-medium"
+                  style={{ background: `${t.accent}20`, color: t.accent }}
+                >
+                  {t.avatar}
+                </div>
+                <span className="label text-[9px] text-white/25">{t.author}</span>
+              </div>
+            </motion.button>
+          ))}
         </div>
       </div>
     </section>
